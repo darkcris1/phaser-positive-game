@@ -24,10 +24,43 @@ export class Start extends Phaser.Scene {
             strokeThickness: 4
         }).setOrigin(0.5);
 
-        // Create buttons with dynamic positioning
-        this.createButton('🧠 Memory Game', 40, '#FFFFFF', 'MemoryGame', '#FF69B4');
-        this.createButton('🌺 Mood Garden', 120, '#FFFFFF', 'MoodGarden', '#DB7093');
-        this.createButton('🌬️ Breath Rhythm', 200, '#FFFFFF', 'BreathRhythmGame', '#FFB6C1');
+        // Get gameType from query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameType = parseInt(urlParams.get('gameType')) || 1;
+
+        // Create buttons based on gameType
+        if (gameType === 2) {
+            // LEVEL 2: MODERATE STRESS (Balance & Grounding)
+            this.add.text(this.game.canvas.width / 2, this.game.canvas.height / 3 - 30, 'Game 2', {
+                fontSize: '20px',
+                fill: '#FFFFFF',
+                fontFamily: 'sans-serif',
+                stroke: '#FF69B4',
+                strokeThickness: 2
+            }).setOrigin(0.5);
+
+            this.createButton('🧩 Postpartum Puzzle', 20, '#FFFFFF', 'PostpartumPuzzle', '#FF69B4');
+            this.createButton('📝 Guided Journaling', 90, '#FFFFFF', 'GuidedJournaling', '#DB7093');
+            this.createButton('🎯 Self-Care Spinner', 160, '#FFFFFF', 'SelfCareSpinner', '#FFB6C1');
+        } else if (gameType === 3) {
+            // LEVEL 3: HIGH STRESS/ANXIETY (Calming & Restorative)
+            this.add.text(this.game.canvas.width / 2, this.game.canvas.height / 3 - 30, 'Game 3', {
+                fontSize: '20px',
+                fill: '#FFFFFF',
+                fontFamily: 'sans-serif',
+                stroke: '#FF69B4',
+                strokeThickness: 3
+            }).setOrigin(0.5);
+
+            this.createButton('🏡 Safe Guided Escape', 20, '#FFFFFF', 'SafeSpaceEscape', '#FF69B4');
+            this.createButton('💗 Heartbeat Sync', 90, '#FFFFFF', 'HeartbeatSync', '#DB7093');
+            this.createButton('🎨 Color Therapy Art Pad', 160, '#FFFFFF', 'ColorTherapyArt', '#FFB6C1');
+        } else {
+            // Default: Original buttons (gameType === 1 or default)
+            this.createButton('🧠 Memory Game', 40, '#FFFFFF', 'MemoryGame', '#FF69B4');
+            this.createButton('🌺 Mood Garden', 120, '#FFFFFF', 'MoodGarden', '#DB7093');
+            this.createButton('🌬️ Breath Rhythm', 200, '#FFFFFF', 'BreathRhythmGame', '#FFB6C1');
+        }
     }
 
     createButton(text, yOffset, textColor, sceneName, bgColor) {

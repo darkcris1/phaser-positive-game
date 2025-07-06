@@ -1,7 +1,10 @@
 import { Start } from './scenes/Start.js';
-import { MemoryGame } from './scenes/MemoryGame.js';
-import { MoodGarden } from './scenes/MoodGarden.js';
-import { BreathRhythmGame } from './scenes/BreathRhythmGame.js';
+import { MemoryGame } from './scenes/Game1/MemoryGame.js';
+import { MoodGarden } from './scenes/Game1/MoodGarden.js';
+import { BreathRhythmGame } from './scenes/Game1/BreathRhythmGame.js';
+import { PostpartumPuzzle } from './scenes/Game2/PostpartumPuzzle.js';
+import { GuidedJournaling } from './scenes/Game2/GuidedJournaling.js';
+import { SelfCareSpinner } from './scenes/Game2/SelfCareSpinner.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -17,7 +20,12 @@ const config = {
         Start,
         MemoryGame,
         MoodGarden,
-        BreathRhythmGame
+        BreathRhythmGame,
+
+        // Game 2
+        GuidedJournaling,
+        SelfCareSpinner,
+        PostpartumPuzzle
     ],
     scale: {
         mode: Phaser.Scale.FIT,
