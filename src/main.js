@@ -5,6 +5,9 @@ import { BreathRhythmGame } from './scenes/Game1/BreathRhythmGame.js';
 import { PostpartumPuzzle } from './scenes/Game2/PostpartumPuzzle.js';
 import { GuidedJournaling } from './scenes/Game2/GuidedJournaling.js';
 import { SelfCareSpinner } from './scenes/Game2/SelfCareSpinner.js';
+import { SafeSpaceEscape } from './scenes/Game3/SafeSpaceEscape.js';
+import { HeartbeatSync } from './scenes/Game3/HeartbeatSync.js';
+import { ColorTherapyArt } from './scenes/Game3/ColorTherapyArt.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -25,7 +28,12 @@ const config = {
         // Game 2
         GuidedJournaling,
         SelfCareSpinner,
-        PostpartumPuzzle
+        PostpartumPuzzle,
+
+        // Game 3
+        SafeSpaceEscape,
+        HeartbeatSync,
+        ColorTherapyArt
     ],
     scale: {
         mode: Phaser.Scale.FIT,
