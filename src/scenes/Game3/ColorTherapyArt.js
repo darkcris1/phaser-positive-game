@@ -326,17 +326,17 @@ export class ColorTherapyArt extends Phaser.Scene {
 
     createStatsDisplay() {
         // Session stats
-        this.strokesDisplay = this.add.text(10, this.game.canvas.height - 80, 'Strokes: 0', {
-            fontSize: '10px',
-            fill: '#A21CAF',
-            fontFamily: 'sans-serif'
-        });
+        // this.strokesDisplay = this.add.text(10, this.game.canvas.height - 80, 'Strokes: 0', {
+        //     fontSize: '10px',
+        //     fill: '#A21CAF',
+        //     fontFamily: 'sans-serif'
+        // });
 
-        this.timeDisplay = this.add.text(10, this.game.canvas.height - 60, 'Time: 0:00', {
-            fontSize: '10px',
-            fill: '#A21CAF',
-            fontFamily: 'sans-serif'
-        });
+        // this.timeDisplay = this.add.text(10, this.game.canvas.height - 60, 'Time: 0:00', {
+        //     fontSize: '10px',
+        //     fill: '#A21CAF',
+        //     fontFamily: 'sans-serif'
+        // });
     }
 
     createBackButton() {

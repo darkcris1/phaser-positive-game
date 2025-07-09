@@ -4,13 +4,25 @@ export class GuidedJournaling extends Phaser.Scene {
         this.currentPromptIndex = 0;
         this.responses = [];
         this.musicPlaying = false;
+        this.relaxingMusic = null;
+        this.textarea = null;
+    }
+
+    preload() {
+        this.load.audio('relaxingMusic', 'assets/musics/relaxing.mp3');
     }
 
     create() {
         this.cameras.main.setBackgroundColor('#FCE4EC'); // Soft pink background
 
+        // Initialize music
+        this.relaxingMusic = this.sound.add('relaxingMusic', { loop: true, volume: 0.5 });
+
+        // Load saved responses from localStorage
+        this.loadSavedResponses();
+
         // Title
-        this.add.text(this.game.canvas.width / 2, 50, '📝 Guided Journaling', {
+        this.add.text(this.game.canvas.width / 2, 70, '📝 Guided Journaling', {
             fontSize: '28px',
             fill: '#BE185D', // Deep pink
             fontFamily: 'sans-serif'
@@ -35,6 +47,21 @@ export class GuidedJournaling extends Phaser.Scene {
         this.createBackButton();
     }
 
+    loadSavedResponses() {
+        const saved = localStorage.getItem('guidedJournalingResponses');
+        if (saved) {
+            try {
+                this.responses = JSON.parse(saved);
+            } catch (e) {
+                this.responses = [];
+            }
+        }
+    }
+
+    saveResponseToStorage() {
+        localStorage.setItem('guidedJournalingResponses', JSON.stringify(this.responses));
+    }
+
     createMusicToggle() {
         const musicButton = this.add.text(this.game.canvas.width - 80, 30, '🎵 Music', {
             fontSize: '16px',
@@ -51,12 +78,20 @@ export class GuidedJournaling extends Phaser.Scene {
                 backgroundColor: this.musicPlaying ? '#BE185D' : '#FBCFE8', 
                 fill: this.musicPlaying ? '#FFFFFF' : '#BE185D' 
             });
+            
+            if (this.musicPlaying) {
+                if (!this.relaxingMusic.isPlaying) {
+                    this.relaxingMusic.play();
+                }
+            } else {
+                this.relaxingMusic.stop();
+            }
         });
     }
 
     createJournalInterface() {
         // Current prompt display
-        this.promptText = this.add.text(this.game.canvas.width / 2, 120, this.prompts[this.currentPromptIndex], {
+        this.promptText = this.add.text(this.game.canvas.width / 2, 140, this.prompts[this.currentPromptIndex], {
             fontSize: '18px',
             fill: '#4A044E', // Dark purple-pink
             fontFamily: 'sans-serif',
@@ -64,25 +99,14 @@ export class GuidedJournaling extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5);
 
+        const textareaHeight = Math.min(350, this.game.canvas.height * 0.4);
+
         // Response area background
-        this.add.rectangle(this.game.canvas.width / 2, 250, this.game.canvas.width - 40, 150, 0xFCE4EC)
+        this.add.rectangle(this.game.canvas.width / 2, textareaHeight + 30, this.game.canvas.width - 40, textareaHeight + 40, 0xFCE4EC)
             .setStrokeStyle(2, 0xE91E63); // Medium pink
 
-        // Response text placeholder
-        this.responseArea = this.add.text(this.game.canvas.width / 2, 200, 'Click here to reflect and type your thoughts...', {
-            fontSize: '14px',
-            fill: '#A21CAF', // Muted pink
-            fontFamily: 'sans-serif',
-            wordWrap: { width: this.game.canvas.width - 80 },
-            align: 'left'
-        }).setOrigin(0.5, 0).setInteractive({ useHandCursor: true });
-
-        this.currentResponse = '';
-        
-        // Simulate typing area click
-        this.responseArea.on('pointerdown', () => {
-            this.startTyping();
-        });
+        // Create HTML textarea for real text input
+        this.createTextarea();
 
         // Navigation buttons
         this.createNavigationButtons();
@@ -91,28 +115,60 @@ export class GuidedJournaling extends Phaser.Scene {
         this.updateProgressIndicator();
     }
 
-    startTyping() {
-        // Simulate text input (in a real implementation, you'd use HTML input)
-        const responses = [
-            "I'm grateful for my family's support, a warm cup of tea, and the quiet moments of peace.",
-            "I'm feeling overwhelmed but trying to be gentle with myself.",
-            "I can take a short walk outside or listen to calming music.",
-            "I'd remind them that healing takes time and they're doing their best.",
-            "I've learned I'm more resilient than I thought.",
-            "Taking care of myself means asking for help when I need it."
-        ];
+    createTextarea() {
+        // Remove existing textarea if it exists
+        if (this.textarea) {
+            this.textarea.remove();
+        }
 
-        this.currentResponse = responses[this.currentPromptIndex] || "Thank you for this moment of reflection.";
-        
-        this.responseArea.setText(this.currentResponse);
-        this.responseArea.setStyle({ fill: '#4A044E' });
-        
-        this.responses[this.currentPromptIndex] = this.currentResponse;
+        const textareaHeight = Math.min(350, this.game.canvas.height * 0.4);
+
+        // Create HTML textarea element
+        this.textarea = document.createElement('textarea');
+        this.textarea.style.position = 'absolute';
+        this.textarea.style.left = '30px';
+        this.textarea.style.top = '190px';
+        this.textarea.style.width = `${this.game.canvas.width - 60}px`;
+        this.textarea.style.height = `${textareaHeight}px`;
+        this.textarea.style.fontSize = '14px';
+        this.textarea.style.fontFamily = 'sans-serif';
+        this.textarea.style.padding = '10px';
+        this.textarea.style.border = 'none';
+        this.textarea.style.borderRadius = '5px';
+        this.textarea.style.backgroundColor = '#FCE4EC';
+        this.textarea.style.color = '#4A044E';
+        this.textarea.style.resize = 'none';
+        this.textarea.style.outline = 'none';
+        this.textarea.placeholder = 'Click here to reflect and type your thoughts...';
+
+        // Load saved response for current prompt
+        const savedResponse = this.responses[this.currentPromptIndex] || '';
+        this.textarea.value = savedResponse;
+
+        // Save response when user types
+        this.textarea.addEventListener('input', () => {
+            this.responses[this.currentPromptIndex] = this.textarea.value;
+            this.saveResponseToStorage();
+        });
+
+        // Add textarea to the game canvas
+        document.body.appendChild(this.textarea);
+
+        // Position relative to canvas
+        this.updateTextareaPosition();
+    }
+
+    updateTextareaPosition() {
+        if (this.textarea) {
+            const canvasRect = this.game.canvas.getBoundingClientRect();
+            this.textarea.style.left = `${canvasRect.left + 30}px`;
+            this.textarea.style.top = `${canvasRect.top + 190}px`;
+        }
     }
 
     createNavigationButtons() {
         // Previous button
-        this.prevButton = this.add.text(100, 350, '← Previous', {
+        this.prevButton = this.add.text(100, this.game.canvas.height - (this.game.canvas.height / 4), '← Previous', {
             fontSize: '16px',
             fill: this.currentPromptIndex > 0 ? '#BE185D' : '#D1A0B4',
             fontFamily: 'sans-serif'
@@ -123,7 +179,7 @@ export class GuidedJournaling extends Phaser.Scene {
         }
 
         // Next button
-        this.nextButton = this.add.text(this.game.canvas.width - 100, 350, 'Next →', {
+        this.nextButton = this.add.text(this.game.canvas.width - 100, this.game.canvas.height - (this.game.canvas.height / 4), 'Next →', {
             fontSize: '16px',
             fill: '#BE185D',
             fontFamily: 'sans-serif'
@@ -133,7 +189,7 @@ export class GuidedJournaling extends Phaser.Scene {
 
         // Finish button (shown on last prompt)
         if (this.currentPromptIndex === this.prompts.length - 1) {
-            this.finishButton = this.add.text(this.game.canvas.width / 2, 400, '✨ Complete Session', {
+            this.finishButton = this.add.text(this.game.canvas.width / 2, this.game.canvas.height - (this.game.canvas.height / 5), '✨ Complete Session', {
                 fontSize: '18px',
                 fill: '#FFFFFF',
                 fontFamily: 'sans-serif',
@@ -169,14 +225,10 @@ export class GuidedJournaling extends Phaser.Scene {
         // Update prompt text
         this.promptText.setText(this.prompts[this.currentPromptIndex]);
 
-        // Update response area
+        // Update textarea with saved response
         const savedResponse = this.responses[this.currentPromptIndex] || '';
-        if (savedResponse) {
-            this.responseArea.setText(savedResponse);
-            this.responseArea.setStyle({ fill: '#4A044E' });
-        } else {
-            this.responseArea.setText('Click here to reflect and type your thoughts...');
-            this.responseArea.setStyle({ fill: '#A21CAF' });
+        if (this.textarea) {
+            this.textarea.value = savedResponse;
         }
 
         // Recreate navigation
@@ -185,7 +237,7 @@ export class GuidedJournaling extends Phaser.Scene {
     }
 
     updateProgressIndicator() {
-        this.progressText = this.add.text(this.game.canvas.width / 2, 90, `Prompt ${this.currentPromptIndex + 1} of ${this.prompts.length}`, {
+        this.progressText = this.add.text(this.game.canvas.width / 2, 100, `Prompt ${this.currentPromptIndex + 1} of ${this.prompts.length}`, {
             fontSize: '12px',
             fill: '#A21CAF',
             fontFamily: 'sans-serif'
@@ -193,6 +245,11 @@ export class GuidedJournaling extends Phaser.Scene {
     }
 
     completeSession() {
+        // Hide textarea
+        if (this.textarea) {
+            this.textarea.style.display = 'none';
+        }
+
         // Show completion message
         this.add.rectangle(this.game.canvas.width / 2, this.game.canvas.height / 2, this.game.canvas.width - 40, 200, 0xF9E6FF)
             .setStrokeStyle(2, 0xC084FC);
@@ -219,6 +276,7 @@ export class GuidedJournaling extends Phaser.Scene {
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         doneButton.on('pointerdown', () => {
+            this.cleanupTextarea();
             this.scene.start('Start');
         });
     }
@@ -231,7 +289,21 @@ export class GuidedJournaling extends Phaser.Scene {
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         backButton.on('pointerdown', () => {
+            this.cleanupTextarea();
             this.scene.start('Start');
         });
+    }
+
+    cleanupTextarea() {
+        if (this.textarea) {
+            this.textarea.remove();
+            this.textarea = null;
+        }
+    }
+
+    // Clean up when scene shuts down
+    shutdown() {
+        this.cleanupTextarea();
+        super.shutdown();
     }
 }
