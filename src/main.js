@@ -19,6 +19,7 @@ const config = {
     backgroundColor: '#FFC0CB',
     fontFamily: 'sans-serif',
     pixelArt: false,
+    resolution: window.devicePixelRatio,
     scene: [
         Start,
         MemoryGame,
